@@ -5,6 +5,20 @@ import express from 'express';
 import morgan from 'morgan';
 import { Low, JSONFile } from 'lowdb';
 
+// Swagger 
+import swaggerJsDoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
+
+const swaggerOptions = {
+  swaggerDefinition: {
+      info: {
+          title: "Nintendo Characters API",
+          version: "1.0.0"
+      }
+  },
+      apis: ["server.js"]
+}
+
 // DB Setup
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -14,6 +28,9 @@ const db = new Low(adapter);
 
 // Initialize express web server
 const app = express();
+// add swagger 
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Configure express with middleware // morgan logs http requests
 app.use(morgan('common'));
@@ -34,7 +51,28 @@ app.use((req, res, next) => {
   next();
 })
 
-// Route functions
+/**
+ * @swagger
+ * /api/characters:
+ *   get:
+ *     summary: get all characters
+ *     produces:
+ *       application/json
+ *   responses:
+ *     200: success
+ *     description : an array of characters
+ *     schema:
+ *       $ref: "#definitions/character"
+ * definitions:
+ *   character:
+ *     properties:
+ *       name:
+ *         type: string
+ *       game:
+ *         type: string
+ * 
+ * 
+ */
 app.get('/api/characters', async (req, res) => {
   await db.read();
   res.json(db.data);
