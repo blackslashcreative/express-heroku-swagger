@@ -1,0 +1,19 @@
+{
+  "name": "office-hours-app",
+  "version": "1.0.0",
+  "description": "A simple Express.js app for my MIT class",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon --ignore 'db.json' server.js",
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "lowdb": "^3.0.0",
+    "morgan": "^1.10.0"
+  }
+}
