@@ -1,9 +1,8 @@
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-
+import fs from 'fs';
 import express from 'express';
 import morgan from 'morgan';
-import { Low, JSONFile } from 'lowdb';
+
+import characterRoutes from './routes/characters.js';
 
 // Swagger 
 import swaggerJsDoc from 'swagger-jsdoc';
@@ -19,25 +18,20 @@ const swaggerOptions = {
       apis: ["server.js"]
 }
 
-// DB Setup
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
-const file = join(__dirname, 'db.json');
-const adapter = new JSONFile(file);
-const db = new Low(adapter);
 
 // Initialize express web server
 const app = express();
-// add swagger 
-const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Configure express with middleware // morgan logs http requests
-app.use(morgan('common'));
+app.use(morgan('tiny'));
 
-// app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('public'));
+
+// Swagger API documentation 
+const swaggerDocument = JSON.parse(fs.readFileSync('./swagger.json'));
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Custom middleware
 app.use((req, res, next) => {
@@ -51,39 +45,8 @@ app.use((req, res, next) => {
   next();
 })
 
-/**
- * @swagger
- * /api/characters:
- *   get:
- *     summary: get all characters
- *     produces:
- *       application/json
- *   responses:
- *     200: success
- *     description : an array of characters
- *     schema:
- *       $ref: "#definitions/character"
- * definitions:
- *   character:
- *     properties:
- *       name:
- *         type: string
- *       game:
- *         type: string
- * 
- * 
- */
-app.get('/api/characters', async (req, res) => {
-  await db.read();
-  res.json(db.data);
-});
-
-app.post('/api/characters', async (req, res) => {
-  console.log(req.body);
-  db.data.characters.push(req.body);
-  await db.write();
-  res.json(db.data);
-});
+// Character Routes 
+app.use(characterRoutes);
 
 const PORT = process.env.PORT ||  3000;
 

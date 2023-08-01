@@ -4,7 +4,7 @@ const characterContainer = document.querySelector('#characters');
 fetch('/api/characters')
   .then(response => response.json())
   .then(data => {
-    data.characters.forEach(character => {
+    data.forEach(character => {
       const pEl = document.createElement('p');
       pEl.textContent = `${character.name} is from the game ${character.game}`;
       characterContainer.appendChild(pEl);
